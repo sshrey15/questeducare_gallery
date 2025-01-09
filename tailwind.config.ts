@@ -8,7 +8,12 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: { 
+        "content": ["schoolbell", "sans-serif"],
+
+      },
       colors: {
+        
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
