@@ -154,16 +154,15 @@ const MasonryGrid = () => {
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <div className="relative overflow-hidden rounded-xl bg-white aspect-[1]">
-              <div className="relative transform transition-transform duration-300">
+             <div className="relative overflow-hidden rounded-xl bg-white aspect-[1]">
+              <div className="relative h-full w-full transform transition-transform duration-300">
                 <Image
                   src={imageUrl}
-                  width={300}
-                  height={400}
                   alt={`Image ${index + 1}`}
-                  className="w-full h-auto object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
-                {/* Hover overlay */}
                 <motion.div
                   className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   initial={false}
