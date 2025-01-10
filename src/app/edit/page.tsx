@@ -82,8 +82,11 @@ const UploadPage = () => {
         title,
         images: base64Images,
       };
-
-      const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager", {
+      const endpoint = process.env.NEXT_PUBLIC_API_ENDPOINT_LOCAL || process.env.NEXT_PUBLIC_API_ENDPOINT_PRODUCTION;
+      if (!endpoint) {
+        throw new Error("API endpoint is not defined");
+      }
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -112,7 +115,12 @@ const UploadPage = () => {
   const fetchGalleryImages = async () => {
     setIsLoadingGallery(true);
     try {
-      const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager");
+      const endpoint = process.env.NEXT_PUBLIC_API_ENDPOINT_LOCAL || process.env.NEXT_PUBLIC_API_ENDPOINT_PRODUCTION;
+      if (!endpoint) {
+        throw new Error("API endpoint is not defined");
+      }
+
+      const response = await fetch(endpoint);
       const data = await response.json();
 
       if (response.ok && data.message === "success") {

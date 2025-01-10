@@ -21,12 +21,15 @@ const MasonryGrid = () => {
     NProgress.start();
     const fetchImages = async () => {
       try {
-        const response = await fetch('https://questeducare-gallery.vercel.app/api/imagemanager');
+        const endpoint = process.env.NEXT_PUBLIC_API_ENDPOINT_LOCAL || process.env.NEXT_PUBLIC_API_ENDPOINT_PRODUCTION;
+        if (!endpoint) {
+          throw new Error('API endpoint is not defined');
+        }
+        const response = await fetch(endpoint);
         const data = await response.json();
         
         if (response.ok && data.message === "success") {
           setImages(data.data);
-          // Initialize like counts from localStorage or default to empty object
           const savedLikes = localStorage.getItem('imageLikes');
           setLikedImages(savedLikes ? JSON.parse(savedLikes) : {});
         } else {
@@ -50,7 +53,6 @@ const MasonryGrid = () => {
         ...prev,
         [index]: (prev[index] || 0) + 1
       };
-      // Save to localStorage
       localStorage.setItem('imageLikes', JSON.stringify(newLikes));
       return newLikes;
     });
@@ -92,38 +94,33 @@ const MasonryGrid = () => {
 
   if (loading) {
     return (
-   
-        <AnimatePresence>
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="fixed bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
+        >
           <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="fixed bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ 
+              duration: 0.5,
+              ease: "easeOut"
+            }}
+            className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ 
-                duration: 0.5,
-                ease: "easeOut"
-              }}
-              className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center"
-            >
-              
-      
-              <Image
-                src="/logoquest.jpg"
-                alt="Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </motion.div>
+            <Image
+              src="/logoquest.jpg"
+              alt="Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </motion.div>
-        </AnimatePresence>
-      );
-      
-    
+        </motion.div>
+      </AnimatePresence>
+    );
   }
 
   if (error) {
@@ -154,16 +151,15 @@ const MasonryGrid = () => {
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            <div className="relative overflow-hidden rounded-xl bg-white">
-              <div className="relative transform transition-transform duration-300">
+            <div className="relative overflow-hidden rounded-xl bg-white aspect-[1]">
+              <div className="relative h-full w-full transform transition-transform duration-300">
                 <Image
                   src={imageUrl}
-                  width={300}
-                  height={400}
                   alt={`Image ${index + 1}`}
-                  className="w-full h-auto object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
-                {/* Hover overlay */}
                 <motion.div
                   className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   initial={false}
@@ -171,7 +167,6 @@ const MasonryGrid = () => {
                 />
               </div>
 
-              {/* Like Button with Counter */}
               <div className="absolute top-2 right-2 flex flex-col items-center">
                 <motion.button
                   className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
@@ -193,7 +188,6 @@ const MasonryGrid = () => {
                     />
                   </svg>
                 </motion.button>
-                {/* Like Counter */}
                 <motion.span 
                   className="text-xs font-semibold bg-white px-2 py-1 rounded-full shadow-sm mt-1"
                   initial={{ scale: 0 }}
@@ -204,7 +198,6 @@ const MasonryGrid = () => {
                 </motion.span>
               </div>
 
-              {/* Shadow Animation */}
               <motion.div
                 className="absolute inset-0 rounded-2xl shadow-lg"
                 animate={{
