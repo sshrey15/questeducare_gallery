@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -12,6 +12,7 @@ type GalleryImage = {
 
 const MasonryGrid = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [likedImages, setLikedImages] = useState<{ [key: number]: number }>({});
@@ -21,14 +22,9 @@ const MasonryGrid = () => {
     const fetchImages = async () => {
       try {
         const response = await fetch('https://questeducare-gallery.vercel.app/api/imagemanager');
-        console.log('Response:', response);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
         const data = await response.json();
-        console.log('Data:', data);
         
-        if (data.message === "success") {
+        if (response.ok && data.message === "success") {
           setImages(data.data);
           // Initialize like counts from localStorage or default to empty object
           const savedLikes = localStorage.getItem('imageLikes');
@@ -40,6 +36,7 @@ const MasonryGrid = () => {
         setError('Failed to fetch images');
         console.error('Error fetching images:', err);
       } finally {
+        setLoading(false);
         NProgress.done();
       }
     };
@@ -92,6 +89,42 @@ const MasonryGrid = () => {
       },
     },
   };
+
+  if (loading) {
+    return (
+   
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                duration: 0.5,
+                ease: "easeOut"
+              }}
+              className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center"
+            >
+              
+      
+              <Image
+                src="/logoquest.jpg"
+                alt="Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      );
+      
+    
+  }
 
   if (error) {
     return (
