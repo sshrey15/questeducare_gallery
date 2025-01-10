@@ -20,7 +20,7 @@ const MasonryGrid = () => {
     NProgress.start();
     const fetchImages = async () => {
       try {
-        const response = await fetch('https://questeducare-gallery.vercel.app/api/imagemanager');
+        const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager");
         console.log('Response:', response);
         if (!response.ok) {
           throw new Error('Network response was not ok');
