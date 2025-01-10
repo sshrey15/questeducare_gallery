@@ -19,6 +19,7 @@ const UploadPage = () => {
   const [activeTab, setActiveTab] = useState<"new" | "edit">("new");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [title, setTitle] = useState("");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [isLoadingGallery, setIsLoadingGallery] = useState(false);
@@ -27,7 +28,23 @@ const UploadPage = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(true); // Modal state for password input
   const router = useRouter();
 
-  const correctPassword = "12345"; // Hardcoded password
+  const correctPassword = "shrey"; // Hardcoded password
+
+  const simulateProgress = () => {
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress((prevProgress) => {
+        if (prevProgress >= 90) {
+          clearInterval(interval);
+          return 90;
+        }
+        return prevProgress + Math.random() * 30;
+      });
+    }, 500);
+
+    return interval;
+  };
+
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +79,8 @@ const UploadPage = () => {
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadStatus("uploading");
+    const progressInterval = simulateProgress();
 
     const convertToBase64 = (file: File) => {
       return new Promise<string>((resolve, reject) => {
@@ -83,7 +101,8 @@ const UploadPage = () => {
         images: base64Images,
       };
 
-      const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager", {
+      const endpoint = "https://questeducare-gallery.vercel.app/api/imagemanager";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,15 +112,24 @@ const UploadPage = () => {
 
       const data = await response.json();
 
+      clearInterval(progressInterval);
+
       if (response.ok && data.message === "success") {
         setUploadProgress(100);
-        alert("Upload successful!");
-        setImages([]);
-        setTitle("");
+        setUploadStatus("success");
+        setTimeout(() => {
+          setImages([]);
+          setTitle("");
+          setUploadProgress(0);
+          setUploadStatus("idle");
+        }, 2000);
       } else {
+        setUploadStatus("error");
         alert("Upload failed: " + data.error);
       }
     } catch (error) {
+      clearInterval(progressInterval);
+      setUploadStatus("error");
       console.error("Error uploading to server:", error);
       alert("Error uploading images.");
     } finally {
@@ -112,7 +140,8 @@ const UploadPage = () => {
   const fetchGalleryImages = async () => {
     setIsLoadingGallery(true);
     try {
-      const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager");
+      const endpoint = "https://questeducare-gallery.vercel.app/api/imagemanager";
+      const response = await fetch(endpoint);
       const data = await response.json();
 
       if (response.ok && data.message === "success") {
@@ -243,17 +272,36 @@ const UploadPage = () => {
                 className="hidden"
               />
 
-              {isUploading && (
+{uploadStatus !== "idle" && (
                 <div className="w-full mt-3 sm:mt-4">
                   <div className="w-full bg-gray-200 rounded-full h-3 sm:h-4">
                     <div
-                      className="bg-blue-500 h-3 sm:h-4 rounded-full transition-all duration-500"
-                      style={{ width: `${uploadProgress}%` }}
+                      className={`h-3 sm:h-4 rounded-full transition-all duration-500 ${
+                        uploadStatus === "success" ? "bg-green-500" : "bg-blue-500"
+                      }`}
+                      style={{ width: `${Math.min(uploadProgress, 100)}%` }}
                     />
                   </div>
-                  <p className="text-center mt-2 text-gray-600 text-sm sm:text-base">
-                    Uploading... {uploadProgress}%
-                  </p>
+                  <div className="flex items-center justify-center mt-2">
+                    {uploadStatus === "uploading" && (
+                      <p className="text-blue-600 text-sm sm:text-base">
+                        Uploading... {Math.round(uploadProgress)}%
+                      </p>
+                    )}
+                    {uploadStatus === "success" && (
+                      <div className="flex items-center text-green-600">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p className="text-sm sm:text-base">Upload successful!</p>
+                      </div>
+                    )}
+                    {uploadStatus === "error" && (
+                      <p className="text-red-600 text-sm sm:text-base">
+                        Upload failed. Please try again.
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
 
