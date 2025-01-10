@@ -23,15 +23,12 @@ export async function POST(req) {
       );
     }
 
-    // Fixed Cloudinary upload code
     const imageLinks = await Promise.all(
       images.map(async (image) => {
         try {
-          console.log(`Uploading image: ${image}`);
           const result = await cloudinary.v2.uploader.upload(image, {
             upload_preset: 'byp1g876'
           });
-          console.log(`Upload successful: ${result.secure_url}`);
           return result.secure_url;
         } catch (error) {
           console.error("Cloudinary upload error:", error);
