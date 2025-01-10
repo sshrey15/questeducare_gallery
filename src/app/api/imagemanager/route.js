@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import cloudinary from 'cloudinary';
+import * as cloudinary from "cloudinary";
 
 const prisma = new PrismaClient();
 
 // Configure Cloudinary
 cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
-  api_key: process.env.CLOUDINARY_API_KEY || '',
-  api_secret: process.env.CLOUDINARY_API_SECRET || ''
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "",
+  api_key: process.env.CLOUDINARY_API_KEY || "",
+  api_secret: process.env.CLOUDINARY_API_SECRET || "",
 });
 
 export async function POST(req) {
@@ -16,47 +16,57 @@ export async function POST(req) {
     const body = await req.json();
     const { title, images } = body;
 
-    if (!title || !images || !Array.isArray(images) || images.length === 0) {
+    // Validate request body
+    if (!title || typeof title !== "string") {
       return NextResponse.json(
-        { message: "Title and at least one image are required" },
+        { message: "Invalid title" },
         { status: 400 }
       );
     }
 
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return NextResponse.json(
+        { message: "At least one valid image URL is required" },
+        { status: 400 }
+      );
+    }
+
+    // Upload images to Cloudinary
     const imageLinks = await Promise.all(
       images.map(async (image) => {
         try {
           const result = await cloudinary.v2.uploader.upload(image, {
-            upload_preset: 'byp1g876'
+            upload_preset: "byp1g876",
           });
           return result.secure_url;
         } catch (error) {
           console.error("Cloudinary upload error:", error);
-          throw new Error(error instanceof Error ? error.message : "Failed to upload image");
+          throw new Error("Failed to upload image to Cloudinary");
         }
       })
     );
 
+    // Save gallery data to Prisma
     const newGallery = await prisma.gallery.create({
       data: {
         title,
         images: imageLinks,
-      }
+      },
     });
 
-    return NextResponse.json({ 
-      message: "success", 
-      data: newGallery 
+    return NextResponse.json({
+      message: "success",
+      data: newGallery,
     });
-
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ 
-      message: "error", 
-      error: error instanceof Error ? error.message : "Internal server error" 
-    }, { 
-      status: 500 
-    });
+    return NextResponse.json(
+      {
+        message: "An error occurred while processing the request",
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
@@ -64,20 +74,21 @@ export async function POST(req) {
 
 export async function GET() {
   try {
+    // Fetch all galleries
     const galleries = await prisma.gallery.findMany();
-    
-    return NextResponse.json({ 
-      message: "success", 
-      data: galleries 
+    return NextResponse.json({
+      message: "success",
+      data: galleries,
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ 
-      message: "error", 
-      error: error instanceof Error ? error.message : "Internal server error" 
-    }, { 
-      status: 500 
-    });
+    return NextResponse.json(
+      {
+        message: "An error occurred while fetching data",
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
