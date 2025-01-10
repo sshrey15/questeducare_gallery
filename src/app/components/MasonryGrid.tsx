@@ -21,7 +21,7 @@ const MasonryGrid = () => {
     NProgress.start();
     const fetchImages = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/imagemanager');
+        const response = await fetch('https://questeducare-gallery.vercel.app/api/imagemanager');
         const data = await response.json();
         
         if (response.ok && data.message === "success") {
