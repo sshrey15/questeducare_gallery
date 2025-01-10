@@ -21,7 +21,7 @@ const MasonryGrid = () => {
     NProgress.start();
     const fetchImages = async () => {
       try {
-        const endpoint = process.env.NEXT_PUBLIC_API_ENDPOINT_LOCAL || process.env.NEXT_PUBLIC_API_ENDPOINT_PRODUCTION;
+        const endpoint =  process.env.NEXT_PUBLIC_API_ENDPOINT_PRODUCTION;
         if (!endpoint) {
           throw new Error('API endpoint is not defined');
         }
