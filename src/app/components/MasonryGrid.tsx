@@ -102,6 +102,7 @@ const MasonryGrid = () => {
   }
 
   const allImages = images.reduce((acc: string[], curr) => [...acc, ...curr.images], []);
+  console.log('All Images:', allImages);
 
   return (
     <motion.div
