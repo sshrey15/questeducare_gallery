@@ -77,7 +77,7 @@ const UploadPage = () => {
       const base64Images = await Promise.all(
         images.map((image) => convertToBase64(image.file))
       );
-
+      // Prepare payload
       const payload = {
         title,
         images: base64Images,
