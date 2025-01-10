@@ -9,6 +9,7 @@ export default {
   theme: {
     extend: {
       fontFamily: { 
+     
         "content": ["schoolbell", "sans-serif"],
 
       },

@@ -1,33 +1,59 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 
-const images = [
-  { src: "/carousel/1.png", width: 300, height: 400 },
-  { src: "/carousel/2.png", width: 300, height: 200 },
-  { src: "/carousel/3.png", width: 300, height: 300 },
-  { src: "/carousel/4.png", width: 300, height: 500 },
-  { src: "/carousel/5.png", width: 300, height: 250 },
-  { src: "/carousel/6.png", width: 300, height: 350 },
-  { src: "/carousel/7.png", width: 300, height: 450 },
-  { src: "/carousel/8.png", width: 300, height: 300 },
-  { src: "/carousel/9.png", width: 300, height: 400 },
-  { src: "/carousel/10.png", width: 300, height: 200 },
-  { src: "/carousel/11.png", width: 300, height: 300 },
-  { src: "/carousel/12.png", width: 300, height: 500 },
-];
+type GalleryImage = {
+  title: string;
+  images: string[];
+};
 
 const MasonryGrid = () => {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [likedImages, setLikedImages] = useState<boolean[]>(
-    Array(images.length).fill(false)
-  );
+  const [likedImages, setLikedImages] = useState<{ [key: number]: number }>({});
+
+  useEffect(() => {
+    NProgress.start();
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/imagemanager');
+        const data = await response.json();
+        
+        if (response.ok && data.message === "success") {
+          setImages(data.data);
+          // Initialize like counts from localStorage or default to empty object
+          const savedLikes = localStorage.getItem('imageLikes');
+          setLikedImages(savedLikes ? JSON.parse(savedLikes) : {});
+        } else {
+          setError(data.error || 'Failed to fetch images');
+        }
+      } catch (err) {
+        setError('Failed to fetch images');
+        console.error('Error fetching images:', err);
+      } finally {
+        setLoading(false);
+        NProgress.done();
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const handleLikeToggle = (index: number) => {
-    setLikedImages((prev) =>
-      prev.map((liked, i) => (i === index ? !liked : liked))
-    );
+    setLikedImages(prev => {
+      const newLikes = {
+        ...prev,
+        [index]: (prev[index] || 0) + 1
+      };
+      // Save to localStorage
+      localStorage.setItem('imageLikes', JSON.stringify(newLikes));
+      return newLikes;
+    });
   };
 
   const containerVariants = {
@@ -64,6 +90,52 @@ const MasonryGrid = () => {
     },
   };
 
+  if (loading) {
+    return (
+   
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                duration: 0.5,
+                ease: "easeOut"
+              }}
+              className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center"
+            >
+              
+      
+              <Image
+                src="/logoquest.jpg"
+                alt="Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      );
+      
+    
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  const allImages = images.reduce((acc: string[], curr) => [...acc, ...curr.images], []);
+
   return (
     <motion.div
       className="max-w-7xl mx-auto px-4 py-8"
@@ -72,7 +144,7 @@ const MasonryGrid = () => {
       animate="visible"
     >
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-8 space-y-8">
-        {images.map((image, index) => (
+        {allImages.map((imageUrl, index) => (
           <motion.div
             key={index}
             className="relative break-inside-avoid group mb-8"
@@ -85,9 +157,9 @@ const MasonryGrid = () => {
             <div className="relative overflow-hidden rounded-xl bg-white">
               <div className="relative transform transition-transform duration-300">
                 <Image
-                  src={image.src}
-                  width={image.width}
-                  height={image.height}
+                  src={imageUrl}
+                  width={300}
+                  height={400}
                   alt={`Image ${index + 1}`}
                   className="w-full h-auto object-cover"
                 />
@@ -99,10 +171,10 @@ const MasonryGrid = () => {
                 />
               </div>
 
-              {/* Like Button */}
-              <div className="absolute top-2 right-2">
+              {/* Like Button with Counter */}
+              <div className="absolute top-2 right-2 flex flex-col items-center">
                 <motion.button
-                  className="p-1 bg-white  rounded-full shadow-md"
+                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
                   onClick={() => handleLikeToggle(index)}
                   whileTap={{ scale: 0.8 }}
                 >
@@ -121,6 +193,15 @@ const MasonryGrid = () => {
                     />
                   </svg>
                 </motion.button>
+                {/* Like Counter */}
+                <motion.span 
+                  className="text-xs font-semibold bg-white px-2 py-1 rounded-full shadow-sm mt-1"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: likedImages[index] ? 1 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {likedImages[index] || 0}
+                </motion.span>
               </div>
 
               {/* Shadow Animation */}
