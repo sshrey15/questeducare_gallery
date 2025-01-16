@@ -93,3 +93,72 @@ export async function GET() {
     await prisma.$disconnect();
   }
 }
+
+
+export  async function PATCH(req){
+  try{
+    const body = await req.json();
+    const {galleryId, imagesToDelete } = body;
+
+    if(!galleryId || typeof galleryId !== "string"){
+      return NextResponse.json({
+        message: "Invalid gallery Id"
+      }, {status: 400})
+    }
+
+    if(!imagesToDelete || !Array.isArray(imagesToDelete) || imagesToDelete.length === 0){
+      return NextResponse.json(
+        {message: "At least one image URL to delete is required"},
+        {status: 400}
+      )
+    }
+
+    const gallery = await prisma.gallery.findUnique({
+      where: {id: galleryId},
+    })
+
+    if(!gallery){
+      return NextResponse.json(
+        {message: "Gallery not found"},
+        {status: 404}
+      )
+    }
+
+    const updatedImages = gallery.images.filter(
+      (image) => !imagesToDelete.includes(image)
+    )
+
+    await Promise.all(
+      imagesToDelete.map(async (imageUrl) => {
+        try{
+          const publicId = imageUrl.split('/').pop().split('.')[0];
+          await cloudinary.v2.uploader.destroy(publicId);
+        }catch(error){
+          console.log("Cloudinary deletion error: ", error);
+        }
+      })
+    )
+    const updatedGallery = await prisma.gallery.update({
+      where: { id: galleryId },
+      data: { images: updatedImages },
+    });
+
+    
+    return NextResponse.json({
+      message: "Images deleted successfully",
+      data: updatedGallery,
+    });
+
+  }catch(error){
+    console.error("API error:", error);
+    return NextResponse.json(
+      {
+        message: "An error occurred while deleting images",
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 }
+    );
+  }finally{
+    await prisma.$disconnect();
+  }
+}

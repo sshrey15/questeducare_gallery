@@ -23,6 +23,7 @@ const MasonryGrid = () => {
     const fetchImages = async () => {
       try {
         const response = await fetch('https://questeducare-gallery.vercel.app/api/imagemanager');
+        console.log("RESPONSE: ", response)
         const data = await response.json();
         
         if (response.ok && data.message === "success") {
