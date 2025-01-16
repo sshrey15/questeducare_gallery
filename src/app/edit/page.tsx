@@ -33,7 +33,7 @@ const UploadPage = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(true); // Modal state for password input
   const router = useRouter();
 
-  const correctPassword = "shrey"; // Hardcoded password
+  const correctPassword = "questeducareadmin"; // Hardcoded password
 
   const simulateProgress = () => {
     setUploadProgress(0);
