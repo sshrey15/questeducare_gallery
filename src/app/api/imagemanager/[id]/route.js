@@ -1,4 +1,4 @@
-import {NextResponse, NextRequest} from "next/server";
+import {NextResponse} from "next/server";
 import {PrismaClient} from "@prisma/client";
 import * as cloudinary from "cloudinary";
 
@@ -10,7 +10,7 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_API_SECRET || "",
 });
 
-export async function GET(req: NextRequest, {params}: {params: {id: string}}){
+export async function GET(req, {params}){
     const id = params.id;
     try{
         const gallery = await prisma.gallery.findUnique({
