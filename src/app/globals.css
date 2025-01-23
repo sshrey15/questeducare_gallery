@@ -29,3 +29,15 @@
   animation: scroll-right 20s linear infinite;
 }
 
+/* Add this CSS to your global styles or a CSS module */
+.my-masonry-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-left: -30px;
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 30px;
+  background-clip: padding-box;
+}

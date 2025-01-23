@@ -95,7 +95,7 @@ export async function GET() {
 }
 
 
-export  async function PATCH(req){
+export async function PATCH(req){
   try{
     const body = await req.json();
     const {galleryId, imagesToDelete } = body;
@@ -128,6 +128,7 @@ export  async function PATCH(req){
       (image) => !imagesToDelete.includes(image)
     )
 
+    // Delete images from Cloudinary
     await Promise.all(
       imagesToDelete.map(async (imageUrl) => {
         try{
@@ -138,12 +139,25 @@ export  async function PATCH(req){
         }
       })
     )
+
+    // If no images remain, delete the entire gallery
+    if (updatedImages.length === 0) {
+      await prisma.gallery.delete({
+        where: { id: galleryId }
+      });
+
+      return NextResponse.json({
+        message: "Gallery deleted as no images remained",
+        data: null,
+      });
+    }
+
+    // Otherwise, update the gallery with remaining images
     const updatedGallery = await prisma.gallery.update({
       where: { id: galleryId },
       data: { images: updatedImages },
     });
 
-    
     return NextResponse.json({
       message: "Images deleted successfully",
       data: updatedGallery,
