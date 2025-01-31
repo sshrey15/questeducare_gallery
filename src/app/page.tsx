@@ -24,10 +24,14 @@ const GalleriesPage = () => {
     NProgress.start();
     const fetchGalleries = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/imagemanager");
+        const response = await fetch("/api/imagemanager");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-
-        if (response.ok && data.message === "success") {
+        console.log(data); // Log the response data
+    
+        if (data.message === "success") {
           setGalleries(data.data);
         } else {
           setError(data.error || "Failed to fetch galleries");
