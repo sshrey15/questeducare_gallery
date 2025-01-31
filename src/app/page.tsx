@@ -55,7 +55,7 @@ const GalleriesPage = () => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
+          className="fixed bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-20 top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -100,7 +100,7 @@ const GalleriesPage = () => {
 
       {/* Background */}
       <div className="fixed top-0 left-0 w-full h-full z-0">
-        <div className="w-full h-full bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
+        <div className="w-full h-full bg-blue-100 bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
       </div>
 
       <div className="relative z-10 w-full pb-16 px-4 sm:px-6 lg:px-8 mt-10">
