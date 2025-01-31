@@ -21,7 +21,7 @@ const EditComponent: React.FC<EditComponentProps> = ({ initialImages = [] }) => 
   const fetchGalleryImages = async () => {
     setIsLoadingGallery(true);
     try {
-      const endpoint = "http://localhost:3000/api/imagemanager";
+      const endpoint = "/api/imagemanager"; // Use relative URL
       const response = await fetch(endpoint);
       const data = await response.json();
 
@@ -41,7 +41,7 @@ const EditComponent: React.FC<EditComponentProps> = ({ initialImages = [] }) => 
     if (initialImages.length === 0) {
       fetchGalleryImages();
     }
-  }, []);
+  }, [initialImages.length]);
 
   const toggleImageSelection = (galleryId: string, imageUrl: string) => {
     setSelectedImages(prev => {
@@ -162,6 +162,7 @@ const EditComponent: React.FC<EditComponentProps> = ({ initialImages = [] }) => 
                             src={image}
                             alt={`${gallery.title} - Image ${imgIndex + 1}`}
                             className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         </div>
                       </div>
