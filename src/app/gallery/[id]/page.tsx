@@ -81,7 +81,7 @@ const GalleryDetailPage = () => {
       <div className="container mx-auto px-4 py-8 mt-10">
               {/* Background */}
       <div className="fixed top-0 left-0 w-full h-full z-0">
-        <div className="w-full h-full bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
+        <div className="w-full h-full  bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
       </div>
         <div className="flex items-center mb-8">
           <button
