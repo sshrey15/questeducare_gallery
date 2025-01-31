@@ -100,7 +100,7 @@ const GalleriesPage = () => {
 
       {/* Background */}
       <div className="fixed top-0 left-0 w-full h-full z-0">
-        <div className="w-full h-full bg-blue-100 bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
+        <div className="w-full h-full bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
       </div>
 
       <div className="relative z-10 w-full pb-16 px-4 sm:px-6 lg:px-8 mt-10">
@@ -131,8 +131,8 @@ const GalleriesPage = () => {
               </div>
 
               {/* Images Row */}
-              <div className="p-4">
-                <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar">
+              <div className="p-4 bg-gray-100  ">
+                <div className="flex gap-4  overflow-x-auto pb-2 hide-scrollbar">
                   {gallery.images.slice(0, 4).map((image, idx) => (
                     <div
                       key={idx}
@@ -148,7 +148,7 @@ const GalleriesPage = () => {
                     </div>
                   ))}
                   {gallery.images.length > 4 && (
-                    <div className="relative w-64 h-48 flex-shrink-0 rounded-lg overflow-hidden">
+                    <div className="relative bg-gray-100 border w-64 h-48 flex-shrink-0 rounded-lg overflow-hidden">
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <Link href={`/gallery/${gallery.id}`}>
                           <div className="text-white text-center cursor-pointer">
