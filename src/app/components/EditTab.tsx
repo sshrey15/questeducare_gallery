@@ -21,7 +21,7 @@ const EditComponent: React.FC<EditComponentProps> = ({ initialImages = [] }) => 
   const fetchGalleryImages = async () => {
     setIsLoadingGallery(true);
     try {
-      const endpoint = "https://questeducare-gallery.vercel.app/api/imagemanager";
+      const endpoint = "http://localhost:3000/api/imagemanager";
       const response = await fetch(endpoint);
       const data = await response.json();
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdFolderOpen, MdEdit } from "react-icons/md";
+import { MdEdit, MdOutlinePhotoLibrary } from "react-icons/md";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import TopCarousel from "./components/TopCarousel";
@@ -24,7 +24,7 @@ const GalleriesPage = () => {
     NProgress.start();
     const fetchGalleries = async () => {
       try {
-        const response = await fetch("https://questeducare-gallery.vercel.app/api/imagemanager");
+        const response = await fetch("http://localhost:3000/api/imagemanager");
         const data = await response.json();
 
         if (response.ok && data.message === "success") {
@@ -99,53 +99,76 @@ const GalleriesPage = () => {
         <div className="w-full h-full bg-[url('/sci.avif')] bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
       </div>
 
-      <div className="relative z-10 w-full pb-16 px-2 sm:px-4 mt-10">
-        {/* Galleries Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap justify-center gap-6 mb-8"
-        >
+      <div className="relative z-10 w-full pb-16 px-4 sm:px-6 lg:px-8 mt-10">
+        {/* Galleries List */}
+        <div className="max-w-6xl mx-auto space-y-6">
           {galleries.map((gallery) => (
-            <Link href={`/gallery/${gallery.id}`} key={gallery.id}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative w-64 h-48 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-              >
-                {/* Folder Tab */}
-                <div className="absolute left-4 w-48 h-6 bg-blue-500 rounded-b-lg shadow-md z-10 flex items-center px-2">
-                  <MdFolderOpen className="h-4 w-4 text-white mr-2" />
-                  <span className="text-xs text-white font-medium w-full overflow-hidden whitespace-nowrap text-ellipsis">
-                    {gallery.title}
+            <motion.div
+              key={gallery.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-4 py-3 flex justify-between items-center border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {gallery.title}
+                </h3>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-500">
+                    {gallery.images.length} items
                   </span>
+                  <Link href={`/gallery/${gallery.id}`}>
+                    <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                      View All
+                    </button>
+                  </Link>
                 </div>
+              </div>
 
-                {/* Thumbnail Grid */}
-                <div className="grid grid-cols-3 gap-1 p-2 pt-8 bg-gray-50 h-full">
-                  {gallery.images.slice(0, 6).map((image, idx) => (
-                    <div key={idx} className="w-full h-16 relative">
+              {/* Images Row */}
+              <div className="p-4">
+                <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar">
+                  {gallery.images.slice(0, 4).map((image, idx) => (
+                    <div
+                      key={idx}
+                      className="relative w-64 h-48 flex-shrink-0 rounded-lg overflow-hidden"
+                    >
                       <Image
                         src={image}
-                        alt={`Thumbnail ${idx + 1}`}
+                        alt={`Gallery image ${idx + 1}`}
                         fill
-                        className="object-cover rounded-sm"
-                        sizes="(max-width: 640px) 33vw, 20vw"
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 33vw"
                       />
                     </div>
                   ))}
+                  {gallery.images.length > 4 && (
+                    <div className="relative w-64 h-48 flex-shrink-0 rounded-lg overflow-hidden">
+                      <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                        <Link href={`/gallery/${gallery.id}`}>
+                          <div className="text-white text-center cursor-pointer">
+                            <MdOutlinePhotoLibrary className="w-8 h-8 mx-auto mb-2" />
+                            <p className="font-medium">
+                              +{gallery.images.length - 4} more
+                            </p>
+                          </div>
+                        </Link>
+                      </div>
+                      <Image
+                        src={gallery.images[4]}
+                        alt="More images preview"
+                        fill
+                        className="object-cover opacity-40"
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                      />
+                    </div>
+                  )}
                 </div>
-
-                {/* Footer */}
-                <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-1 text-center">
-                  <p className="text-xs text-gray-600 font-medium">
-                    {gallery.images.length} images
-                  </p>
-                </div>
-              </motion.div>
-            </Link>
+              </div>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       <TopCarousel />
@@ -165,6 +188,17 @@ const GalleriesPage = () => {
           Made with <span className="text-red-500">❤️</span> from Questeducare
         </p>
       </footer>
+
+      {/* Custom CSS for hiding scrollbar */}
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };
