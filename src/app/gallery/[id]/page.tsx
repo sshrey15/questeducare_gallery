@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import { MdArrowBack } from "react-icons/md";
+
 
 type GalleryDetail = {
   id: string;
@@ -80,31 +82,18 @@ const GalleryDetailPage = () => {
 
       <div className="container mx-auto px-4 py-8 mt-10">
               {/* Background */}
-      <div className="fixed top-0 left-0 w-full h-full z-0">
-        <div className="w-full h-full  bg-fixed bg-center bg-cover sm:bg-[length:20%] opacity-40" />
-      </div>
-        <div className="flex items-center mb-8">
+     
+     {/* Back Button */}
+     <div className="flex items-center mb-8">
           <button
             onClick={() => router.push("/")}
-            className="mr-4 hover:bg-gray-100 p-2 rounded-full transition"
+            className="flex items-center mr-4  p-2 rounded-full transition cursor-pointer"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
+            <MdArrowBack className="text-black font-xl w-6 h-6" />
+            <span className="ml-2 text-3xl font-bold">{gallery?.title}</span>
           </button>
-          <h1 className="text-3xl font-bold">{gallery?.title}</h1>
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {gallery?.images.map((imageUrl, index) => (
             <motion.div
