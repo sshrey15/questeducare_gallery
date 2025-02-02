@@ -1,53 +1,24 @@
-import {NextResponse} from "next/server";
-import {PrismaClient} from "@prisma/client";
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import * as cloudinary from "cloudinary";
 
 const prisma = new PrismaClient();
 
+// Configure Cloudinary
 cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "",
-    api_key: process.env.CLOUDINARY_API_KEY || "",
-    api_secret: process.env.CLOUDINARY_API_SECRET || "",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "",
+  api_key: process.env.CLOUDINARY_API_KEY || "",
+  api_secret: process.env.CLOUDINARY_API_SECRET || "",
 });
-
-export async function GET(req, {params}){
-    const id = params.id;
-    try{
-        const gallery = await prisma.gallery.findUnique({
-            where: {id},
-        });
-
-        if(!gallery){
-            return NextResponse.json(
-                {message: "Gallery not found"},
-                {status: 404}
-            );
-        }
-
-        return NextResponse.json({
-            message: "success",
-            data: gallery,
-        });
-
-    }catch(err){
-        console.error("API error: ", err);
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        return NextResponse.json(
-            {message: "error", error: errorMessage},
-            {status: 500}
-        );
-    } finally{
-        await prisma.$disconnect();
-    }
-}
-
 
 export async function PATCH(req){
     try{
         const body = await req.json();
         const {id, images} = body;
+        console.log("body", body);
 
-        if(!id || typeof id !== "number"){
+        if(!id || typeof id !== "string"){
+
             return NextResponse.json(
                 {message: "Invalid gallery ID"},
                 {status: 400}
@@ -60,6 +31,19 @@ export async function PATCH(req){
                 {status: 400}
             );
         }
+
+        const existingGallery = await prisma.gallery.findUnique({
+            where: {id},
+        })
+        
+        if(!existingGallery){
+            return NextResponse.json(
+                {message: "Gallery not found"},
+                {status: 404}
+            )
+        }
+
+
 
         const imageLinks = await Promise.all(
             images.map(async (image) => {
@@ -74,10 +58,10 @@ export async function PATCH(req){
                 }
             })
         )
-
+        const updatedImages = [...existingGallery.images, ...imageLinks];
         const updatedGallery = await prisma.gallery.update({
             where: {id},
-            data: {images: imageLinks},
+            data: {images: updatedImages},
         });
 
         return NextResponse.json({
